@@ -4,7 +4,7 @@ import numpy as np
 # Physic configuration
 degree = 0
 n_air = 1.0
-n_water = [1.3320, 1.3325, 1.3331, 1.3349, 1.3390, 1.3435]  # red, orange, yellow, green, blue, purple
+n_water = [1.331, 1.3324, 1.3331, 1.334, 1.3367, 1.3390, 1.343]  # red, orange, yellow, green, light blue, blue, purple
 
 scene = canvas(
     background=vec(1, 1, 1),
@@ -20,17 +20,13 @@ scene = canvas(
 
 
 # squared perpendicular reflection coefficient
-def rs_coefficient(i, t, n1, n2):
-    theta_c = asin(min(n2 / n1, 1))
-    k = (pi / 2) / theta_c
-    return k * (sin(t - i) / sin(t + i)) ** 2
+def rs_coefficient(a, b):
+    return (sin(a - b) ** 2 / sin(a + b) ** 2) ** 2
 
 
 # squared parallel reflection coefficient
-def rp_coefficient(i, t, n1, n2):
-    theta_c = asin(min(n2 / n1, 1))
-    k = (pi / 2) / theta_c
-    return k * (tan(t - i) / tan(t + i)) ** 2
+def rp_coefficient(a, b):
+    return (tan(a - b) ** 2 / tan(a + b) ** 2) ** 2
 
 
 class Ray:
@@ -40,15 +36,15 @@ class Ray:
         self.pos = np.array([], dtype=vec)
         self.v = np.array([], dtype=vec)
         self.axis = []
-        self.log = [[], [], [], [], [], []]
-        self.opacity = [[], [], [], [], [], []]
+        self.log = [[], [], [], [], [], [], []]
+        self.opacity = [[], [], [], [], [], [], []]
         self.exit_angles = []
         self.dt = 0.001
 
-        self.in_lens = [False, False, False, False, False, False]
-        self.reflected = [0, 0, 0, 0, 0, 0]
+        self.in_lens = [False, False, False, False, False, False, False]
+        self.reflected = [0, 0, 0, 0, 0, 0, 0]
 
-        for i in range(6):
+        for i in range(7):
             self.v = np.append(self.v, vec(cos(-angle), sin(-angle), 0))
             self.pos = np.append(self.pos, _pos)
 
@@ -91,6 +87,13 @@ class Ray:
             ],
             [
                 cylinder(pos=_pos,
+                         color=color.cyan,
+                         radius=beam_radius,
+                         visible=False,
+                         canvas=scene)
+            ],
+            [
+                cylinder(pos=_pos,
                          color=color.blue,
                          radius=beam_radius,
                          visible=False,
@@ -105,7 +108,7 @@ class Ray:
             ]]
 
     def refract(self, droplet_pos, droplet_r):
-        for i in range(6):
+        for i in range(7):
             if not self.in_lens[i] and self.reflected[i] == 0 and mag(droplet_pos - self.pos[i]) <= droplet_r:
                 is_in_type = True
                 self.in_lens[i] = True
@@ -138,19 +141,18 @@ class Ray:
             normal_v *= -1 if not is_in_type else 1
             angle_in = diff_angle(self.v[i], normal_v)
             angle_out = asin(n1 / n2 * sin(angle_in))
-            self.opacity[i].append(1 - (rs_coefficient(angle_in, angle_out, n1, n2) +
-                                        rp_coefficient(angle_in, angle_out, n1, n2)) / 2)
+            self.opacity[i].append(1 - (sqrt(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out))))
             self.v[i] = rotate(normal_v,
                                angle=angle_out,
                                axis=cross(normal_v, self.v[i]))
-            if not is_in_type and (i == 0 or i == 5) and len(
+            if not is_in_type and (i == 0 or i == 6) and len(
                     self.beams[i]) == 3:
                 self.exit_angles.append(
                     diff_angle(self.v[i], -self.white.axis) * 180 / pi)
             self.pos[i] += self.v[i] * 0.1
 
     def reflect(self, droplet_pos, droplet_r):
-        for i in range(6):
+        for i in range(7):
             if self.in_lens[i] and self.reflected[i] == 0 and mag(
                     droplet_pos - self.pos[i]) >= 0.999 * droplet_r:
                 self.reflected[i] += 1
@@ -161,12 +163,9 @@ class Ray:
                 self.beams[i][0].visible = True
 
                 normal_v = norm(droplet_pos - self.pos[i])
-                n1 = n_water[i]
-                n2 = n_air
                 angle_in = diff_angle(-self.v[i], normal_v)
                 angle_out = asin(n_water[i] / n_air * sin(angle_in))
-                self.opacity[i].append((rs_coefficient(angle_in, angle_out, n1, n2) +
-                                        rp_coefficient(angle_in, angle_out, n1, n2)) / 2)
+                self.opacity[i].append(sqrt(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out)))
                 angle_ref = diff_angle(-self.v[i], normal_v)
                 self.v[i] = rotate(normal_v,
                                    angle=angle_ref,
@@ -174,7 +173,7 @@ class Ray:
                 self.pos[i] += self.v[i] * 0.1
 
     def update(self, droplet_pos, droplet_r):
-        for i in range(6):
+        for i in range(7):
             self.refract(droplet_pos, droplet_r)
             self.reflect(droplet_pos, droplet_r)
             if len(self.beams[i]) >= 3:
@@ -203,12 +202,12 @@ def run_droplet(f_degree):
         while not done:
             rate(100000)
             ray_arr[i].update(droplet.pos, droplet.radius)
-            for j in range(6):
-                if mag(ray_arr[i].pos[j]) >= 15:
+            for j in range(7):
+                if mag(ray_arr[i].pos[j]) >= 20:
                     done = True
                     break
 
 
 angle_label = wtext(text='', pos=scene.title_anchor)
-angle_label.text = "Угол падения: {0:3.1f}".format(degree * 180 / pi) + " градусов"
+angle_label.text = "Угол лучей от горизонта: {0:3.1f}".format(degree * 180 / pi) + " градусов"
 run_droplet(degree)

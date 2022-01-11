@@ -60,7 +60,13 @@ _rainbow = [
     ring(pos=main_axis.axis / 2,
          axis=main_axis.axis,
          radius=mag(main_axis.axis / 2) * tan(40.4 * pi / 180),
-         thickness=_thickness,
+         thickness=_thickness / 2,
+         color=color.cyan),
+
+    ring(pos=main_axis.axis / 2,
+         axis=main_axis.axis,
+         radius=mag(main_axis.axis / 2) * tan(40.2 * pi / 180),
+         thickness=_thickness / 2,
          color=color.blue),
 
     ring(pos=main_axis.axis / 2,
@@ -117,7 +123,7 @@ def rotate_rainbow(my_slider):
     main_axis.axis = new_axis
     anti_axis.axis = -new_axis
 
-    for i in range(6):
+    for i in range(7):
         _rainbow[i].axis = rotate(vec(200, 0, 0), angle)
         _rainbow[i].pos = rotate(vec(200, 0, 0), angle) / 2
 
