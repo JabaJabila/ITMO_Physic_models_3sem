@@ -46,7 +46,9 @@ for i in range(len(f_arr)):
     U_arr.append(I0_arr[i] / (f_arr[i] * 2 * pi * C))
     U_f_sheet.write(i + 1, col + 1, U_arr[i])
 
-fig, axs = plt.subplots(2, 1, constrained_layout=True)
+fig, axs = plt.subplots(1, 2, constrained_layout=True)
+fig.set_figheight(5)
+fig.set_figwidth(10)
 axs[0].plot(f_arr, U_arr, '-')
 axs[0].set_title('Dependence of the amplitude of the output voltage\n on the frequency of the input')
 axs[0].set_xlabel('f, Hz')
