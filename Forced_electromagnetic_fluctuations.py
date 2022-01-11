@@ -74,7 +74,7 @@ C_arr = [c ** -1 for c in C_arr]
 f_rez_arr = [f ** 2 for f in f_rez_arr]
 
 func = interpolate.interp1d(C_arr, f_rez_arr)
-cnew = np.arange(C_arr[-1], C_arr[0], 1e8)
+cnew = np.arange(C_arr[-1], C_arr[0], 1e7)
 fnew = func(cnew)
 
 axs[1].plot(C_arr, f_rez_arr, 'o', cnew, fnew, '-')
