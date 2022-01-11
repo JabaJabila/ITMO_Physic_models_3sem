@@ -62,7 +62,7 @@ second = min(U_arr[10:], key=lambda x: abs(x - max(U_arr) / sqrt(2)))
 Q_graph = f_rez / (f_arr[np.where(U_arr == second)] - f_arr[np.where(U_arr == first)])
 Q_calculated = 1 / R * sqrt(L / C)
 
-print('Quality factor according to the graph:', Q_graph)
+print('Quality factor according to the graph:', *Q_graph)
 print('Quality factor according to the calculations:', Q_calculated)
 
 C_arr = [1, 3, 10, 30, 100, 300]
