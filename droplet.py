@@ -4,7 +4,7 @@ import numpy as np
 # Physic configuration
 degree = 0
 n_air = 1.0
-n_water = [1.331, 1.3324, 1.3331, 1.334, 1.3367, 1.3390, 1.343]  # red, orange, yellow, green, light blue, blue, purple
+n_water = [1.331, 1.3324, 1.3331, 1.334, 1.3367, 1.339, 1.343]  # red, orange, yellow, green, light blue, blue, purple
 
 scene = canvas(
     background=vec(1, 1, 1),
@@ -19,14 +19,14 @@ scene = canvas(
 )
 
 
-# squared perpendicular reflection coefficient
+# perpendicular reflection coefficient
 def rs_coefficient(a, b):
-    return (sin(a - b) ** 2 / sin(a + b) ** 2) ** 2
+    return sin(a - b) ** 2 / sin(a + b) ** 2
 
 
-# squared parallel reflection coefficient
+# parallel reflection coefficient
 def rp_coefficient(a, b):
-    return (tan(a - b) ** 2 / tan(a + b) ** 2) ** 2
+    return tan(a - b) ** 2 / tan(a + b) ** 2
 
 
 class Ray:
@@ -141,7 +141,7 @@ class Ray:
             normal_v *= -1 if not is_in_type else 1
             angle_in = diff_angle(self.v[i], normal_v)
             angle_out = asin(n1 / n2 * sin(angle_in))
-            self.opacity[i].append(1 - (sqrt(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out))))
+            self.opacity[i].append(1 - sqrt(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out)/2))
             self.v[i] = rotate(normal_v,
                                angle=angle_out,
                                axis=cross(normal_v, self.v[i]))
@@ -165,7 +165,7 @@ class Ray:
                 normal_v = norm(droplet_pos - self.pos[i])
                 angle_in = diff_angle(-self.v[i], normal_v)
                 angle_out = asin(n_water[i] / n_air * sin(angle_in))
-                self.opacity[i].append(sqrt(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out)))
+                self.opacity[i].append(rs_coefficient(angle_in, angle_out) + rp_coefficient(angle_in, angle_out)/2)
                 angle_ref = diff_angle(-self.v[i], normal_v)
                 self.v[i] = rotate(normal_v,
                                    angle=angle_ref,

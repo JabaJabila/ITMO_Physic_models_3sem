@@ -87,7 +87,7 @@ b = fnew[1] - k * cnew[1]
 
 R_graph = sqrt(abs(b) * 4 * k)
 
-print('Сoil inductance according to the graph:', k)
+print('Coil inductance according to the graph:', k)
 print('Active resistance according to the graph:', R_graph)
 
 f_C_sheet = workbook.add_worksheet("Dependence f from C")
